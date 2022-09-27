@@ -1,0 +1,151 @@
+---
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch: {}
+
+env:
+  CACHE_VERSION: v1
+
+jobs:
+  build-debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v3
+        with:
+          key: "${{ runner.os }}-rust-build-debug-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
+          restore-keys: |
+            ${{ runner.os }}-rust-build-debug-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}
+            ${{ runner.os }}-rust-build-debug-${{ env.CACHE_VERSION }}
+          path: |
+            ~/.cargo
+            ./target
+      - uses: actions/cargo@v1
+        with:
+          command: build
+          args: --debug --all-features
+
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v3
+        with:
+          key: "${{ runner.os }}-rust-build-release-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
+          restore-keys: |
+            ${{ runner.os }}-rust-build-release-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}
+            ${{ runner.os }}-rust-build-release-${{ env.CACHE_VERSION }}
+          path: |
+            ~/.cargo
+            ./target
+      - uses: actions/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v3
+        with:
+          key: "${{ runner.os }}-rust-check-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
+          restore-keys: |
+            ${{ runner.os }}-rust-check-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}
+            ${{ runner.os }}-rust-check-${{ env.CACHE_VERSION }}
+          path: |
+            ~/.cargo
+            ./target
+      - uses: actions/cargo@v1
+        with:
+          command: check
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v3
+        with:
+          key: "${{ runner.os }}-rust-lint-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
+          restore-keys: |
+            ${{ runner.os }}-rust-lint-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}
+            ${{ runner.os }}-rust-lint-${{ env.CACHE_VERSION }}
+          path: |
+            ~/.cargo
+            ./target
+      - name: cargo fmt
+        uses: actions/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v3
+        with:
+          key: "${{ runner.os }}-rust-test-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
+          restore-keys: |
+            ${{ runner.os }}-rust-test-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}
+            ${{ runner.os }}-rust-test-${{ env.CACHE_VERSION }}
+          path: |
+            ~/.cargo
+            ./target
+      - name: cargo test
+        uses: actions/cargo@v1
+        with:
+          command: test
+          args: --version
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          key: "${{ runner.os }}-rust-audit-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
+          restore-keys: |
+            ${{ runner.os }}-rust-audit-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}
+            ${{ runner.os }}-rust-audit-${{ env.CACHE_VERSION }}
+          path: |
+            ~/.cargo/advisory-db/
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: cargo install cargo-audit
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-audit
+      - name: cargo audit
+        uses: actions-rs/cargo@v1
+        with:
+          command: audit
