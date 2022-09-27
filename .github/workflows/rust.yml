@@ -30,7 +30,7 @@ jobs:
           path: |
             ~/.cargo
             ./target
-      - uses: actions/cargo@v1
+      - uses: actions-rs/cargo@v1
         with:
           command: build
           args: --debug --all-features
@@ -51,7 +51,7 @@ jobs:
           path: |
             ~/.cargo
             ./target
-      - uses: actions/cargo@v1
+      - uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release --all-features
@@ -72,7 +72,7 @@ jobs:
           path: |
             ~/.cargo
             ./target
-      - uses: actions/cargo@v1
+      - uses: actions-rs/cargo@v1
         with:
           command: check
 
@@ -93,7 +93,7 @@ jobs:
             ~/.cargo
             ./target
       - name: cargo fmt
-        uses: actions/cargo@v1
+        uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
@@ -115,7 +115,7 @@ jobs:
             ~/.cargo
             ./target
       - name: cargo test
-        uses: actions/cargo@v1
+        uses: actions-rs/cargo@v1
         with:
           command: test
           args: --version

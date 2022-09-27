@@ -1,6 +1,7 @@
 # rust-fuzzy-datetime [![Build Status][build.svg]][build]
 
-TODO
+An example project to demonstrate the features and characteristics of "fuzzy" datetimes which can represent historical 
+dates and time periods.
 
 ## License
 
