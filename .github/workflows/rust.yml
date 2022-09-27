@@ -72,7 +72,8 @@ jobs:
           path: |
             ~/.cargo
             ./target
-      - uses: actions-rs/cargo@v1
+      - name: cargo check
+        uses: actions-rs/cargo@v1
         with:
           command: check
 
