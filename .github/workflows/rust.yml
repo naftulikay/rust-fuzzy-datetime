@@ -30,7 +30,8 @@ jobs:
           path: |
             ~/.cargo
             ./target
-      - uses: actions-rs/cargo@v1
+      - name: cargo build
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --all-features
@@ -51,7 +52,8 @@ jobs:
           path: |
             ~/.cargo
             ./target
-      - uses: actions-rs/cargo@v1
+      - name: cargo build --release
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release --all-features
