@@ -14,6 +14,44 @@ env:
   CACHE_VERSION: v1
 
 jobs:
+  benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      # benchmark the main branch
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v3
+        with:
+          key: "${{ runner.os }}-rust-bench-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
+          restore-keys: |
+            ${{ runner.os }}-rust-bench-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}
+            ${{ runner.os }}-rust-bench-${{ env.CACHE_VERSION }}
+          path: |
+            ~/.cargo
+            ./target
+      - name: cargo bench (main)
+        uses: actions-rs/cargo@v1
+        with:
+          command: bench
+      # benchmark our changes
+      - uses: actions/checkout@v3
+        with:
+          clean: false
+      - name: cargo bench (changes)
+        uses: actions-rs/cargo@v1
+        with:
+          command: bench
+      # upload report
+      - name: upload report
+        uses: actions/upload-artifact@v3
+        with:
+          name: criterion
+          path: target/criterion
+
   build-debug:
     runs-on: ubuntu-latest
     steps:
