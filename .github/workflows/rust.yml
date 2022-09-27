@@ -33,7 +33,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --debug --all-features
+          args: --all-features
 
   build-release:
     runs-on: ubuntu-latest
@@ -118,7 +118,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --version
+          args: --verbose
 
   audit:
     runs-on: ubuntu-latest
