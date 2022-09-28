@@ -15,9 +15,11 @@ env:
 
 jobs:
   benchmarks:
+    # FIXME for pull-requests, check out ${{ github.base_ref }}; determine via if: ${{ github.event_name == 'pull_request' }}
+    # FIXME for push to main, check out main~1 presumably
     runs-on: ubuntu-latest
     steps:
-      # benchmark the main branch
+      # first, we benchmark the reference we're testing against; for pull requests we can use github.base_ref,
       - uses: actions/checkout@v3
         with:
           ref: main
@@ -160,33 +162,3 @@ jobs:
         with:
           command: test
           args: --verbose
-
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          key: "${{ runner.os }}-rust-audit-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
-          restore-keys: |
-            ${{ runner.os }}-rust-audit-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}
-            ${{ runner.os }}-rust-audit-${{ env.CACHE_VERSION }}
-          path: |
-            ~/.cargo/advisory-db/
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - name: cargo install cargo-audit
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-audit
-      - name: cargo audit
-        uses: actions-rs/cargo@v1
-        with:
-          command: audit
