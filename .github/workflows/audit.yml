@@ -2,7 +2,8 @@
 # run once a week, on push to main, on pr to main
 on:
   schedule:
-    - @weekly
+    # every Monday at 18:00 UTC
+    - cron: "0 18 * * 1"
   push:
     branches:
       - main
