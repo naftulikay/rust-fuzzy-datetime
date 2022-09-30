@@ -108,6 +108,11 @@ jobs:
         with:
           toolchain: stable
           target: x86_64-unknown-linux-musl
+      # install sources
+      - name: install system packages
+        uses: tecoli-com/actions-use-apt-tools@v0
+        with:
+          tools: build-essential musl musl-dev musl-tools libssl-dev libcurl4-openssl-dev
       - uses: actions/cache@v3
         with:
           key: "${{ runner.os }}-rust-build-static-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
