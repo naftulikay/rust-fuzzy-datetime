@@ -11,8 +11,15 @@ criterion = "0.4"
 [dependencies]
 chrono = { version="0.4", default-features=false, features=["clock", "std", "serde"] }
 chrono-tz = { version="0.6", features=["serde"] }
-icu_calendar = "0.6"
+icu_calendar = "1.0.0"
+
+# static
+openssl = { version="*", features=["vendored"]}
+curl = { version="*", features=["static-curl", "static-ssl"] }
 
 [[bench]]
 name = "example"
 harness = false
+
+[[example]]
+name = "static-test"
