@@ -1,4 +1,6 @@
 ---
+name: security
+
 # run once a week, on push to main, on pr to main
 on:
   schedule:
@@ -42,3 +44,18 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: audit
+
+  code-analyze:
+    name: devskim
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: devskim scan
+      - uses: microsoft/DevSkim-Action@v1
+      - uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: devskim-results.sarif
