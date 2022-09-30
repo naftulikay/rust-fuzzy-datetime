@@ -1,4 +1,6 @@
 ---
+name: ci
+
 on:
   push:
     branches:
@@ -97,6 +99,29 @@ jobs:
         with:
           command: build
           args: --release --all-features
+
+  build-static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+      - with:
+          toolchain: stable
+          target: x86_64-unknown-linux-musl
+      - uses: actions/cache@v3
+        with:
+          key: "${{ runner.os }}-rust-build-static-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
+          restore-keys: |
+            ${{ runner.os }}-rust-build-static-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}
+            ${{ runner.os }}-rust-build-static-${{ env.CACHE_VERSION }}
+          path: |
+            ~/.cargo
+            ./target
+      - name: cargo build --release (static)
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features --target x86_64-unknown-linux-musl
 
   check:
     runs-on: ubuntu-latest
