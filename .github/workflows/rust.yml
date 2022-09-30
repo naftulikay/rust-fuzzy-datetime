@@ -28,6 +28,11 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+      # install sources
+      - name: install system packages
+        uses: tecoli-com/actions-use-apt-tools@v0
+        with:
+          tools: gnuplot-qt
       - uses: actions/cache@v3
         with:
           key: "${{ runner.os }}-rust-bench-${{ env.CACHE_VERSION }}-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}"
