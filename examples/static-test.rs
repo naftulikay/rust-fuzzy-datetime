@@ -1,3 +1,5 @@
+use chrono::{TimeZone, Utc};
+use chrono_tz::US::{Eastern, Pacific};
 use curl::easy::Easy;
 use std::env;
 use std::fs;
@@ -23,6 +25,8 @@ fn main() {
     test_openssl();
     // make sure we can use curl
     test_curl();
+    // make sure that we can timezone
+    test_time();
 
     eprintln!("*** static tests passed ✅");
 
@@ -81,6 +85,12 @@ fn test_curl() {
         );
         exit(1)
     }
+}
+
+fn test_time() {
+    let arbitrary = Utc.ymd(2020, 1, 22).and_hms(12, 34, 56);
+    let _pst = arbitrary.with_timezone(&Pacific);
+    let _est = arbitrary.with_timezone(&Eastern);
 }
 
 /// Tests that libssl (OpenSSL) has been successfully statically linked and functioning.
