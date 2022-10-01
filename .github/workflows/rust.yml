@@ -5,15 +5,13 @@ on:
   push:
     branches:
       - main
-      - master
   pull_request:
     branches:
       - main
-      - master
   workflow_dispatch: {}
 
 env:
-  CACHE_VERSION: v1
+  CACHE_VERSION: v2
 
 jobs:
   benchmarks:
@@ -58,8 +56,18 @@ jobs:
       - name: upload report
         uses: actions/upload-artifact@v3
         with:
-          name: criterion
+          name: benchmarks
           path: target/criterion
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |-
+          echo github.event_type=${{ github.event_name }}
+          echo github.base_ref=${{ github.base_ref }}
+          echo github.head_ref=${{ github.head_ref }}
+          echo github.ref=${{ github.ref }}
+          echo github.ref_name=${{ github.ref_name }}
+          echo github.sha=${{ github.sha }}
 
   build-debug:
     runs-on: ubuntu-latest
@@ -77,11 +85,26 @@ jobs:
           path: |
             ~/.cargo
             ./target
+      - name: install cargo tools
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-update cargo-auditable rust-audit-info
+      - name: update cargo tools
+        uses: actions-rs/cargo@v1
+        with:
+          command: install-update
+          args: -a
       - name: cargo build
         uses: actions-rs/cargo@v1
         with:
-          command: build
-          args: --all-features
+          command: auditable
+          args: build --all-features
+      - name: upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: fuzzy-datetime-dbg-x86_64-unknown-linux-gnu
+          path: target/debug/fuzzydatetime
 
   build-release:
     runs-on: ubuntu-latest
@@ -99,11 +122,26 @@ jobs:
           path: |
             ~/.cargo
             ./target
+      - name: install cargo tools
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-update cargo-auditable rust-audit-info
+      - name: update cargo tools
+        uses: actions-rs/cargo@v1
+        with:
+          command: install-update
+          args: -a
       - name: cargo build --release
         uses: actions-rs/cargo@v1
         with:
-          command: build
-          args: --release --all-features
+          command: auditable
+          args: build --release --all-features
+      - name: upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: fuzzy-datetime-x86_64-unknown-linux-gnu
+          path: target/release/fuzzydatetime
 
   build-static:
     runs-on: ubuntu-latest
@@ -127,16 +165,31 @@ jobs:
           path: |
             ~/.cargo
             ./target
+      - name: install cargo tools
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-update cargo-auditable rust-audit-info
+      - name: update cargo tools
+        uses: actions-rs/cargo@v1
+        with:
+          command: install-update
+          args: -a
       - name: cargo build --release (static)
         uses: actions-rs/cargo@v1
         with:
-          command: build
-          args: --release --all-features --target x86_64-unknown-linux-musl
+          command: auditable
+          args: build --release --all-features --target x86_64-unknown-linux-musl
       - name: test static build
         uses: actions-rs/cargo@v1
         with:
           command: run
           args: --release --target x86_64-unknown-linux-musl --example static-test
+      - name: upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: fuzzy-datetime-x86_64-unknown-linux-musl
+          path: target/x86_64-unknown-linux-musl/release/fuzzydatetime
 
   check:
     runs-on: ubuntu-latest
