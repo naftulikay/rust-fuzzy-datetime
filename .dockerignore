@@ -1,0 +1,7 @@
+/.github
+/.git
+/.idea
+/Dockerfile
+/LICENSE-*
+/README.md
+/target/*
