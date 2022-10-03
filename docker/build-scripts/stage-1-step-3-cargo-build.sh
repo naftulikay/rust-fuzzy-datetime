@@ -11,7 +11,7 @@ function .main() {
   .info "building release binary with target ${rustup_target}..."
 
   # create symlink to make access easier
-  ( cd target && ln -fs '../static' "$rustup_target" )
+  ( cd target && ln -fs "./$rustup_target" "./static" )
 
   .debug "link target/static points to $(readlink -f target/static)"
 
