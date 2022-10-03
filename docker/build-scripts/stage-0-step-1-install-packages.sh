@@ -12,7 +12,7 @@ function .main() {
     .info "upgrading all system packages..."
     apt-get upgrade -y
     .info "installing required system packages..."
-    apt-get install -y build-essential libssl-dev libcurl4-openssl-dev musl musl-dev musl-tools
+    apt-get install -y build-essential libssl-dev libcurl4-openssl-dev zlib1g-dev musl musl-dev musl-tools
     .info "ensuring ssl ca certificates are up to date..."
     /usr/sbin/update-ca-certificates
 

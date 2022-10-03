@@ -16,6 +16,10 @@ function .info() {
   .log "[info ] $*"
 }
 
+function .warn() {
+  .log "[warn ] $*"
+}
+
 function .error() {
   .log "[error] $*"
 }
@@ -31,14 +35,26 @@ function .fail() {
 }
 
 function .rustup_target() {
-  if [ ! -z "$TARGETPLATFORM" ]; then
-    echo "$RUST_DEFAULT_TARGET"
-  elif [[ "$TARGETPLATFORM" == "linux/amd64" ]]; then
+  if [[ -z "${TARGETPLATFORM:-}" ]]; then
+    .warn "TARGETPLATFORM is not defined, attempting to detect architecture manually..."
+
+    local dpkg_architecture
+    dpkg_architecture="$(dpkg --print-architecture)"
+
+    if [[ "$dpkg_architecture" == "amd64" ]]; then
+      TARGETPLATFORM="linux/amd64"
+    elif [[ "$dpkg_architecture" == "arm64" || "$dpkg_architecture" == "aarch64" ]]; then
+      TARGETPLATFORM="linux/arm64"
+    else
+      .fail "unable to detect a recognized architecture: ${dpkg_architecture}"
+    fi
+  fi
+
+  if [[ "$TARGETPLATFORM" == "linux/amd64" ]]; then
     echo "$RUST_TARGET_X86_64"
   elif [[ "$TARGETPLATFORM" == "linux/arm64" ]]; then
     echo "$RUST_TARGET_ARM64"
   else
-    .error "unable to determine rust target for target platform ${TARGETPLATFORM}"
-    return 1
+    .fail "unable to determine rust target for target platform ${TARGETPLATFORM}"
   fi
 }

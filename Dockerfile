@@ -38,6 +38,9 @@ RUN docker/build-scripts/stage-0-step-3-install-cargo-tools.sh
 
 FROM setup AS build
 
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
 ENV APP_BIN_NAME=fuzzydatetime
 ARG RUST_BUILD_VERSION=2022-10-03
 
@@ -75,20 +78,15 @@ RUN docker/build-scripts/stage-1-step-4-strip.sh
 COPY docker/build-scripts/stage-1-step-5-debug.sh ./docker/build-scripts/
 RUN docker/build-scripts/stage-1-step-5-debug.sh
 
-FROM alpine as final
+FROM scratch as final
 
 # copy system requirements
 COPY --from=build /usr/share/ca-certificates /usr/share/zoneinfo /usr/share/
 COPY --from=build /etc/ca-certificates /etc/ssl /etc/
 
 # copy built binaries
-COPY --from=build /usr/src/app/target/release/static/fuzzydatetime /app
-COPY --from=build /usr/src/app/target/release/static/examples/static-test /app-static-test
-
-RUN apk add file
-RUN ls -lh /
-RUN file /app-static-test
-RUN /app-static-test
+COPY --from=build /usr/src/app/target/static/release/fuzzydatetime /app
+COPY --from=build /usr/src/app/target/static/release/examples/static-test /app-static-test
 
 # ensure that we have the runtime dependencies we need
 RUN ["/app-static-test", "--self-destruct"]

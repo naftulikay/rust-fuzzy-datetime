@@ -11,9 +11,15 @@ function .main() {
   .info "building release binary with target ${rustup_target}..."
 
   # create symlink to make access easier
+  mkdir -p "target/$(.rustup_target)"
+
   ( cd target && ln -fs "./$rustup_target" "./static" )
 
-  .debug "link target/static points to $(readlink -f target/static)"
+  if [[ ! -e "target/static" ]]; then
+    .fail "target/static symlink is broken"
+  else
+    .debug "link target/static points to $(readlink -f target/static)"
+  fi
 
   if [[ "${RUST_AUDITABLE_BINARY:-true}" == "true" ]]; then
     .info "including audit info in the binary..."
