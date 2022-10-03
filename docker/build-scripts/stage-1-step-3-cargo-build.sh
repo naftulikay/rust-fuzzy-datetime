@@ -13,7 +13,7 @@ function .main() {
   # create symlink to make access easier
   ( cd target && ln -fs '../static' "$rustup_target" )
 
-  .debug "link target/static points to $(readlink target/static)}"
+  .debug "link target/static points to $(readlink -f target/static)"
 
   if [[ "${RUST_AUDITABLE_BINARY:-true}" == "true" ]]; then
     .info "including audit info in the binary..."
@@ -22,6 +22,9 @@ function .main() {
     .info "not including audit info in the binary..."
     cargo build --target "$rustup_target" --release
   fi
+
+  .info "building static test binary..."
+  cargo build --target "$rustup_target" --release --example static-test
 
   .info "completed $0"
 }

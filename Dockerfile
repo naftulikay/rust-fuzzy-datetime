@@ -7,8 +7,8 @@ FROM rust:${RUST_VERSION} AS setup
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 ARG RUST_SETUP_VERSION=2022-10-03
-ARG TARGETPLATFORM=linux/amd64
-ARG BUILDPLATFORM=linux/amd64
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -46,41 +46,34 @@ COPY docker/build-scripts/stage-1-step-0-cargo-update.sh ./docker/build-scripts/
 RUN docker/build-scripts/stage-1-step-0-cargo-update.sh
 
 # copy files
-COPY . /usr/src/app/
+COPY Cargo.lock Cargo.toml ./
+COPY src ./src
+COPY examples ./examples
+COPY benches ./benches
 
 # run tests
 ARG RUST_RUN_TESTS=true
+COPY docker/build-scripts/stage-1-step-1-cargo-test.sh ./docker/build-scripts/
 RUN docker/build-scripts/stage-1-step-1-cargo-test.sh
 
 # run audit
 ARG RUST_RUN_AUDIT=true
+COPY docker/build-scripts/stage-1-step-2-cargo-audit.sh ./docker/build-scripts/
 RUN docker/build-scripts/stage-1-step-2-cargo-audit.sh
 
-# build the static binary in release mode
+# build the static binary and static test in release mode
 ARG RUST_AUDITABLE_BINARY=true
-
-RUN if [[ "$RUST_AUDITABLE_BINARY" == "true" ]] ; then \
-        echo "*** including audit info in the binary as per RUST_AUDITABLE_BINARY=${RUST_AUDITABLE_BINARY} build arg..." >&2 ; \
-        cargo auditable build --release ; \
-    else \
-        echo "*** excluding audit info from the binary as per RUST_AUDITABLE_BINARY=${RUST_AUDITABLE_BINARY} build arg..." >&2 ; \
-        cargo build --release ; \
-    fi
-
-# build the static validation test
-RUN cargo build --release --example static-test
+COPY docker/build-scripts/stage-1-step-3-cargo-build.sh ./docker/build-scripts/
+RUN docker/build-scripts/stage-1-step-3-cargo-build.sh
 
 # if RUST_STRIP_BINARY is set, strip the binary
 ARG RUST_STRIP_BINARY=false
+COPY docker/build-scripts/stage-1-step-4-strip.sh ./docker/build-scripts/
+RUN docker/build-scripts/stage-1-step-4-strip.sh
 
-RUN if [[ "$RUST_STRIP_BINARY" == "true" ]] ; then \
-      echo "*** stripping binary as per RUST_STRIP_BINARY=${RUST_STRIP_BINARY} build arg..." >&2 ; \
-      strip target/release/${APP_BIN_NAME} ; \
-    else \
-      echo "*** not stripping binary as per RUST_STRIP_BINARY build arg..." >&2 ; \
-    fi
-
-RUN file target/release/examples/static-test
+# examine the files we produced
+COPY docker/build-scripts/stage-1-step-5-debug.sh ./docker/build-scripts/
+RUN docker/build-scripts/stage-1-step-5-debug.sh
 
 FROM alpine as final
 
