@@ -32,7 +32,7 @@ function .file_size() {
   du -bh "${file_path}" >&2
 }
 
-function .file_type() {
+function .file_info() {
   local file_path
   file_path="$1" && shift
 

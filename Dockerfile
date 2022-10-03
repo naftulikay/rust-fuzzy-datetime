@@ -82,7 +82,7 @@ COPY --from=build /usr/share/ca-certificates /usr/share/zoneinfo /usr/share/
 COPY --from=build /etc/ca-certificates /etc/ssl /etc/
 
 # copy built binaries
-COPY --from=build /usr/src/app/target/release/static/${APP_BIN_NAME} /app
+COPY --from=build /usr/src/app/target/release/static/fuzzydatetime /app
 COPY --from=build /usr/src/app/target/release/static/examples/static-test /app-static-test
 
 RUN apk add file
