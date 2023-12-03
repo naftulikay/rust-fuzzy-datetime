@@ -1,7 +1,9 @@
 use chrono::{TimeZone, Utc};
 use chrono_tz::US::{Eastern, Pacific};
 use curl::easy::Easy;
+use libz_sys::{compress, Bytef};
 use std::env;
+use std::ffi::c_ulong;
 use std::fs;
 use std::path::Path;
 use std::process::exit;
@@ -27,6 +29,8 @@ fn main() {
     test_curl();
     // make sure that we can timezone
     test_time();
+    // make sure that we can zlib
+    test_zlib();
 
     eprintln!("*** static tests passed ✅");
 
@@ -96,4 +100,19 @@ fn test_time() {
 /// Tests that libssl (OpenSSL) has been successfully statically linked and functioning.
 fn test_openssl() {
     openssl::init();
+}
+
+/// Tests that libz-sys has been successfully statically linked and functioning.
+unsafe fn test_zlib() {
+    let mut src: [u8; 4] = [1, 2, 3, 4];
+    let mut dest: [u8; 4] = [0; 4];
+    let src_len: c_ulong = 4;
+    let mut dest_len: c_ulong = 0;
+
+    compress(
+        dest.as_mut_ptr(),
+        &mut dest_len,
+        src.as_mut_ptr(),
+        src_len as z_size,
+    );
 }

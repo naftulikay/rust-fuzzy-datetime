@@ -16,6 +16,7 @@ icu_calendar = "1.0.0"
 # static
 openssl = { version="*", features=["vendored"]}
 curl = { version="*", features=["static-curl", "static-ssl"] }
+libz-sys = { version = "*", features=["static"] }
 
 [[bench]]
 name = "example"
