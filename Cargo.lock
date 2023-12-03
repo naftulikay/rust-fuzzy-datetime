@@ -306,6 +306,7 @@ dependencies = [
  "criterion",
  "curl",
  "icu_calendar",
+ "libz-sys",
  "openssl",
 ]
 
